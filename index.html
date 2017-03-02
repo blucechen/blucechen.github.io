@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="./css/style.css"/>
+
+    <!--注意这里的文件格式是less不是css必须要声明的-->
+    <!--注意这里的文件格式是less不是css必须要声明的-->
+    <link rel="stylesheet/less" href="./css/display.less"/>
+    <link rel="stylesheet" href="./css/display.css"/>
+    <script type="text/javascript" src="./js/less.js"></script>
+    <script type="text/javascript" src="./js/sort.js"></script>
+</head>
+<body>
+
+<div class="show">
+    <div class="control">
+        <button type="button" class="button black forward">向左</button>
+        <button type="button" class="button black backward">向右</button>
+        <button type="button" class="button black exchange">交换</button>
+        <button type="button" class="button black import">导入数据</button>
+        <button type="button" class="button black finish">一次结束</button>
+    </div>
+    <div class="data-show">
+        <!-- mvc 数据驱动-->
+        <div class="d-s-position">
+            <div class="data"></div>
+            <div class="data"></div>
+            <div class="data"></div>
+            <div class="data"></div>
+            <div class="data"></div>
+            <div class="data"></div>
+            <div class="data"></div>
+            <div class="point-l point"></div>
+            <div class="point-r point"></div>
+        </div>
+
+    </div>
+</div>
+
+<div class="desc">
+    <p>原理：定义一个函数(fun)将数组分成左右两部分，要求左边的部分数都比右边的部分小;
+        对左右两部分再继续回调这个函数(fun)本身,这样不断递归调用，数组就可以被成功排序(其中一种具体操作见下面)</p>
+    <p>1,定义左指针和右指针和支点(数组最后一个)</p>
+    <p>2,左指针向右移动,直到找到第一个不比支点小的数;右指针向右移动,直到找到第一个不比支点大的数</p>
+    <p>3.1,比较两个指针的索引值,如果左指针小于右指针,交换指针对应的值,然后移动指针继续步骤2<p>
+    <p>3.2,否则交换左指针的值与支点的值并以左指针为分界点将这个数组分成两个数组,这次排序结束,进入下一次</p>
+</div>
+
+
+</body>
+
+<script type="text/javascript">
+
+    var sort = new Sort();
+
+    //测试数据
+    var arr = [2, 7, 8, 3, 4, 6, 5];
+
+    var moveToLeft = document.querySelector(".forward");
+    var moveToRight = document.querySelector(".backward");
+    var importData = document.querySelector(".import");
+    var exchange = document.querySelector(".exchange");
+    var datas = document.querySelectorAll(".data");
+    var finish = document.querySelector(".finish");
+    var points = document.querySelectorAll(".point");
+
+
+    comeOn(arr);
+    var step = 70;
+
+    function comeOn(arr) {
+        var arr = arr;
+
+        //导入数据
+        importData.onclick = function () {
+            importEventHandle(arr);
+        }
+
+        //移动左右指针
+        moveToRight.onclick = function () {
+            points[0].style.left = parseInt(points[0].style.left) + step + "px";
+        }
+        moveToLeft.onclick = function () {
+            points[1].style.left = parseInt(points[1].style.left) - step + "px";
+        }
+
+        //交换数据
+        exchange.onclick = function () {
+            var left = parseInt(points[0].style.left);
+            var right = parseInt(points[1].style.left);
+
+            //求出对应的索引值
+            var index_left = left / step;
+            var index_right = right / step;
+            if ( right > left){
+                //没有错位
+                exchangeHandle(index_left, index_right);
+
+            }else {
+                //错位了
+                exchangeHandle(index_left, arr.length - 1);
+                datas[index_left].style.backgroundColor = "red";
+
+                //切割数组--只取左边部分
+                arr = arr.slice(0, index_left);
+                comeOn(arr);
+            }
+        }
+
+        function exchangeHandle(index_left, index_right) {
+            datas[index_left].style.height = arr[index_right] * 20 + "px";
+            datas[index_left].innerHTML = arr[index_right];
+            datas[index_right].style.height = arr[index_left] * 20 + "px";
+            datas[index_right].innerHTML = arr[index_left];
+            sort.swap(arr, index_left, index_right);
+        }
+
+        //一次完成
+        finish.onclick = function () {
+            importEventHandle(arr);
+        }
+
+        function importEventHandle(arr) {
+            for (var i = 0; i < arr.length; i++) {
+                datas[i].style.height = arr[i] * 20 + "px";
+                datas[i].style.left = (i * step) + "px";
+                datas[i].innerHTML = arr[i];
+            }
+            //隐藏多余的datas
+            for (var i = arr.length; i < datas.length; i++) {
+                datas[i].style.height = "0px";
+                datas[i].innerHTML = "";
+            }
+            //出现指针
+            points[0].style.left = "0px";
+            points[0].style.display = "block";
+            points[1].style.left = (arr.length - 2) * step + "px";
+            points[1].style.display = "block";
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+
+
+</html>
